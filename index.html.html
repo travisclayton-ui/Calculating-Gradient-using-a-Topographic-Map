@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bermagui Gradient Topographic Quiz</title>
+  <style>
+    :root {
+      --bg: #f4f6f3;
+      --surface: #ffffff;
+      --ink: #1f2a1f;
+      --muted: #5b6b5f;
+      --accent: #1f6f52;
+      --accent-2: #d8efe2;
+      --border: #d6ddd5;
+      --correct: #1b7f46;
+      --wrong: #b23a3a;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(135deg, #245b46, #2d7b5a);
+      color: white;
+      padding: 28px 20px;
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    header p {
+      margin: 0;
+      max-width: 900px;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .map-panel {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      align-items: start;
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .pill {
+      background: var(--accent-2);
+      border: 1px solid #b9dbc8;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: bold;
+    }
+    .question {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 16px;
+      background: #fcfdfc;
+    }
+    .question h3 {
+      margin: 0 0 12px;
+      font-size: 1.08rem;
+    }
+    .options label {
+      display: block;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 8px 0;
+      cursor: pointer;
+      background: white;
+    }
+    .options input { margin-right: 8px; }
+    .match-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .match-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    select, button {
+      font: inherit;
+    }
+    select, .text-answer {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #b8c4b8;
+      background: white;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button.secondary {
+      background: #5a6c5f;
+    }
+    .result {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #f6faf6;
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .correct { color: var(--correct); font-weight: bold; }
+    .wrong { color: var(--wrong); font-weight: bold; }
+    .small { color: var(--muted); font-size: 0.95rem; }
+    @media (max-width: 800px) {
+      .map-panel { grid-template-columns: 1fr; }
+    </style>
+</head>
+<body>
+  <header>
+    <h1>Bermagui Gradient Topographic Quiz</h1>
+    <p>This PAT-style prototype uses a simplified Bermagui topographic map crop to test contour interpretation, steepness and gradient calculation. Based on the Bermagui topographic map, the scale is 1:25,000 and the contour interval is 10 metres.</p>
+  </header>
+
+  <main>
+    <section class="card map-panel">
+      <div>
+        <img src="./assets/bermagui-map-crop-annotated.png" alt="Cropped Bermagui topographic map used for quiz questions" style="width:100%; border-radius:14px; border:1px solid #d6ddd5; box-shadow: var(--shadow);" />
+      </div>
+      <div>
+        <h2>Map notes</h2>
+        <p class="legend">This version uses a real screenshot cropped from the attached Bermagui topographic map PDF, with visible A and B points added directly onto the map. These are now the teaching reference points for the gradient questions in this prototype.</p>
+        <div class="meta">
+          <div class="pill">Scale: 1:25,000</div>
+          <div class="pill">Contour interval: 10 m</div>
+          <div class="pill">Source: Bermagui PDF crop</div>
+          <div class="pill">Use for contour reading</div>
+          <div class="pill">A and B now marked</div>
+        </div>
+        <p class="small" style="margin-top:14px;">Teacher note: A and B are now marked directly on the map crop. The next refinement, if needed, would be to tighten the exact elevation reading from the contour lines around those points.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Questions</h2>
+
+      <div class="question" data-answer="b">
+        <h3>1. What is the scale of this topographic map?</h3>
+        <div class="options">
+          <label><input type="radio" name="q1" value="a">1:2,500</label>
+          <label><input type="radio" name="q1" value="b">1:25,000</label>
+          <label><input type="radio" name="q1" value="c">1:250,000</label>
+          <label><input type="radio" name="q1" value="d">1:10,000</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="b">
+        <h3>2. What is the contour interval on this map?</h3>
+        <div class="options">
+          <label><input type="radio" name="q2" value="a">5 metres</label>
+          <label><input type="radio" name="q2" value="b">10 metres</label>
+          <label><input type="radio" name="q2" value="c">20 metres</label>
+          <label><input type="radio" name="q2" value="d">25 metres</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="true">
+        <h3>3. True or false: Contour lines that are close together show a steeper slope.</h3>
+        <div class="options">
+          <label><input type="radio" name="q3" value="true">True</label>
+          <label><input type="radio" name="q3" value="false">False</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="false">
+        <h3>4. True or false: Widely spaced contour lines show a very steep slope.</h3>
+        <div class="options">
+          <label><input type="radio" name="q4" value="true">True</label>
+          <label><input type="radio" name="q4" value="false">False</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="c">
+        <h3>5. Which labelled slope is the steepest?</h3>
+        <div class="options">
+          <label><input type="radio" name="q5" value="a">Slope A</label>
+          <label><input type="radio" name="q5" value="b">Slope B</label>
+          <label><input type="radio" name="q5" value="c">Slope C</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="c">
+        <h3>6. Point A is on the 40 m contour and Point B is on the 100 m contour. What is the vertical difference between the two points?</h3>
+        <div class="options">
+          <label><input type="radio" name="q6" value="a">40 m</label>
+          <label><input type="radio" name="q6" value="b">50 m</label>
+          <label><input type="radio" name="q6" value="c">60 m</label>
+          <label><input type="radio" name="q6" value="d">140 m</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="b">
+        <h3>7. The ground distance between Point A and Point B is 600 m. What is the gradient between A and B?</h3>
+        <div class="options">
+          <label><input type="radio" name="q7" value="a">1:5</label>
+          <label><input type="radio" name="q7" value="b">1:10</label>
+          <label><input type="radio" name="q7" value="c">1:20</label>
+          <label><input type="radio" name="q7" value="d">1:60</label>
+        </div>
+      </div>
+
+      <div class="question" data-answer="b">
+        <h3>8. Which statement best explains why one slope is steeper than another on a topographic map?</h3>
+        <div class="options">
+          <label><input type="radio" name="q8" value="a">The steeper slope has more vegetation.</label>
+          <label><input type="radio" name="q8" value="b">The steeper slope has contour lines closer together.</label>
+          <label><input type="radio" name="q8" value="c">The steeper slope is closer to the sea.</label>
+          <label><input type="radio" name="q8" value="d">The steeper slope has more roads.</label>
+        </div>
+      </div>
+
+      <div class="question" data-match="q9">
+        <h3>9. Match each topographic term to its meaning.</h3>
+        <div class="match-grid">
+          <div class="match-row">
+            <div><strong>Contour line</strong></div>
+            <select data-match-item="contour line">
+              <option value="">Choose...</option>
+              <option value="equal height">A line joining places of equal height</option>
+              <option value="difference">The difference in height between contour lines</option>
+              <option value="steepness">The steepness of a slope</option>
+              <option value="exact height">The exact height of a point above sea level</option>
+            </select>
+          </div>
+          <div class="match-row">
+            <div><strong>Contour interval</strong></div>
+            <select data-match-item="contour interval">
+              <option value="">Choose...</option>
+              <option value="equal height">A line joining places of equal height</option>
+              <option value="difference">The difference in height between contour lines</option>
+              <option value="steepness">The steepness of a slope</option>
+              <option value="exact height">The exact height of a point above sea level</option>
+            </select>
+          </div>
+          <div class="match-row">
+            <div><strong>Gradient</strong></div>
+            <select data-match-item="gradient">
+              <option value="">Choose...</option>
+              <option value="equal height">A line joining places of equal height</option>
+              <option value="difference">The difference in height between contour lines</option>
+              <option value="steepness">The steepness of a slope</option>
+              <option value="exact height">The exact height of a point above sea level</option>
+            </select>
+          </div>
+          <div class="match-row">
+            <div><strong>Spot height</strong></div>
+            <select data-match-item="spot height">
+              <option value="">Choose...</option>
+              <option value="equal height">A line joining places of equal height</option>
+              <option value="difference">The difference in height between contour lines</option>
+              <option value="steepness">The steepness of a slope</option>
+              <option value="exact height">The exact height of a point above sea level</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" data-answer="b">
+        <h3>10. A student says: “The slope near Yellow Hill is gentle because the contour lines are close together.” Is the student correct?</h3>
+        <div class="options">
+          <label><input type="radio" name="q10" value="a">Yes</label>
+          <label><input type="radio" name="q10" value="b">No</label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="markBtn">Mark quiz</button>
+        <button class="secondary" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="result" id="resultBox"></div>
+    </section>
+  </main>
+
+  <script>
+    const correctMatches = {
+      'contour line': 'equal height',
+      'contour interval': 'difference',
+      'gradient': 'steepness',
+      'spot height': 'exact height'
+    };
+
+    function checkRadio(name, answer) {
+      const chosen = document.querySelector(`input[name="${name}"]:checked`);
+      if (!chosen) return { answered: false, correct: false };
+      return { answered: true, correct: chosen.value === answer };
+    }
+
+    function markQuiz() {
+      let score = 0;
+      let total = 10;
+      let feedback = [];
+
+      const radioAnswers = {
+        q1: 'b', q2: 'b', q3: 'true', q4: 'false', q5: 'c',
+        q6: 'c', q7: 'b', q8: 'b', q10: 'b'
+      };
+
+      Object.entries(radioAnswers).forEach(([key, answer], index) => {
+        const res = checkRadio(key, answer);
+        const qNum = key.replace('q','');
+        if (res.correct) score += 1;
+        feedback.push(`<div>${res.correct ? '<span class="correct">Correct</span>' : '<span class="wrong">Incorrect</span>'} - Question ${qNum}</div>`);
+      });
+
+      const selects = document.querySelectorAll('[data-match-item]');
+      let matchCorrect = true;
+      selects.forEach(sel => {
+        const item = sel.getAttribute('data-match-item');
+        if (sel.value !== correctMatches[item]) matchCorrect = false;
+      });
+      if (matchCorrect) score += 1;
+      feedback.splice(8, 0, `<div>${matchCorrect ? '<span class="correct">Correct</span>' : '<span class="wrong">Incorrect</span>'} - Question 9</div>`);
+
+      const percent = Math.round((score / total) * 100);
+      let grade = 'Needs more practice';
+      if (percent >= 90) grade = 'Excellent';
+      else if (percent >= 75) grade = 'Strong';
+      else if (percent >= 60) grade = 'Sound';
+
+      const resultBox = document.getElementById('resultBox');
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = `
+        <h3>Your result</h3>
+        <p><strong>Score:</strong> ${score} / ${total}</p>
+        <p><strong>Percent:</strong> ${percent}%</p>
+        <p><strong>Comment:</strong> ${grade}</p>
+        <hr>
+        <p><strong>Answer key:</strong></p>
+        ${feedback.join('')}
+        <hr>
+        <p class="small">Teacher key: Q1 B, Q2 B, Q3 True, Q4 False, Q5 C, Q6 C, Q7 B, Q8 B, Q9 matching task, Q10 No.</p>
+      `;
+      resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetQuiz() {
+      document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+      document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+      const resultBox = document.getElementById('resultBox');
+      resultBox.style.display = 'none';
+      resultBox.innerHTML = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('markBtn').addEventListener('click', markQuiz);
+    document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+  </script>
+</body>
+</html>
